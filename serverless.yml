@@ -1,0 +1,67 @@
+service: nextjs-lambda-test
+
+provider:
+  name: aws
+  region: ap-northeast-2
+  stage: development
+  runtime: nodejs16.x
+  stackName: ${self:provider.stage}-${self:service}
+  apiName: ${self:provider.stage}-${self:service}
+  timeout: 25
+  memorySize: 2048
+  versionFunctions: false
+  # apiGateway:
+  #   binaryMediaTypes:
+  #     - '*/*'
+
+  tracing:
+    apiGateway: true
+    lambda: true
+  environment:
+    NODE_ENV: production
+
+functions:
+  app:
+    handler: index.handle
+    events:
+      - http:
+          cors: true
+          path: "/"
+          method: any
+      - http:
+          cors: true
+          path: "{proxy+}"
+          method: any
+
+package:
+  individually: true
+#  exclude:
+#    - .next/cache/**
+
+plugins:
+  - serverless-domain-manager
+
+custom:
+  customDomain:
+    domainName: "nextjslambdatest.com"
+    basePath: ""
+    stage: ${self:provider.stage}
+    createRoute53Record: true
+    #certificateName: c9ee796b-8216-4beb-9285-60a57700084b
+    securityPolicy: tls_1_2
+# service: nextjs-lambda-test
+# provider:
+#   name: aws
+#   runtime: nodejs16.x
+#   stage: dev
+#   region: ap-northeast-2
+# plugins:
+#   - serverless-nextjs-plugin
+# custom:
+#   name: nextjs-lambda-test
+#   serverless-nextjs:
+#     assetsBucketName: "ts-serverless-nextjs-${self:provider.stage}"
+#     cloudFront: true
+# package:
+#   exclude:
+#     - ./**
